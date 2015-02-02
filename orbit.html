@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+	<title>Orbit</title>
+	<style type="text/css" media="screen">
+		body {
+        margin:2em 4em; background:#ddd; text-align:center
+    }
+    
+		canvas {
+        display:block; border:1px solid #aaa; margin:1em auto; background:#fff;
+    }
+	</style>
+</head>
+<body>
+    <script src="orbit.js"></script>
+    <canvas height="500" width="500"></canvas>
+    <script type="text/javascript" charset="utf-8">
+        (function() {
+            var lastTime = 0;
+            var vendors = ['webkit', 'moz'];
+            for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+                window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+                window.cancelAnimationFrame =
+                  window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+            }
+        
+            if (!window.requestAnimationFrame)
+                window.requestAnimationFrame = function(callback, element) {
+                    var currTime = new Date().getTime();
+                    var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+                    var id = window.setTimeout(function() { callback(currTime + timeToCall); },
+                      timeToCall);
+                    lastTime = currTime + timeToCall;
+                    return id;
+                };
+        
+            if (!window.cancelAnimationFrame)
+                window.cancelAnimationFrame = function(id) {
+                    clearTimeout(id);
+                };
+        }());
+        
+        var earth = new Image;
+        earth.src = 'earth.png';
+        
+        window.onload = function(){
+          var c = document.getElementsByTagName('canvas')[0];
+          var ctx = c.getContext('2d');
+          var aColor = "#004080";
+          var vColor = "#ff0000";
+          var moonColor = "#000000";
+          var font = "bold 22px Apple Chancery";
+          var orbit = new Orbit(ctx);
+          
+          var i = 0;
+          
+          (function drawFrame(){
+            ctx.save();
+            ctx.clearRect( 0, 0, c.width, c.height );
+            
+            // earth
+            ctx.translate( c.width/2 , c.height/2 );
+            ctx.drawImage( earth, 0-earth.width/2, 0-earth.height/2 );
+            
+            // orbit path
+            orbit.drawPath(0,0,160);
+            
+            // rotate
+            ctx.rotate(i);
+            
+            // set font
+            ctx.font = font;
+            
+            // lines
+            orbit.drawLine({x:0,y:160},{x:0,y:120},3,aColor)
+            orbit.drawLine({x:0,y:160},{x:-48,y:160},3,vColor)
+            
+            // arrow heads
+            orbit.drawArrow({x:0,y:110},{x:-7,y:120},{x:7,y:120},aColor); // a arrow
+            orbit.drawArrow({x:-55,y:160},{x:-46,y:167},{x:-46,y:153},vColor); // v arrow
+            
+            // text
+            orbit.drawChar(-5,105,"a",aColor);
+            orbit.drawChar(-73,165,"v",vColor);
+            
+            // moon
+            orbit.drawMoon(0,160,8,moonColor);
+            
+            i = i+.01;
+            
+            ctx.restore();
+            window.requestAnimationFrame(drawFrame);
+          }());
+        }
+    </script>
+</body>
+</html>
